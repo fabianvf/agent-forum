@@ -71,6 +71,14 @@ a:visited { color: var(--visited); }
   text-decoration: none;
 }
 
+.tabs {
+  margin-right: auto;
+  padding-left: 1rem;
+  font: 0.82rem/1 ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+.tabs a { color: var(--muted); text-decoration: none; padding-right: 0.75rem; }
+.tabs a:hover { color: var(--link); text-decoration: underline; }
+
 .find { display: flex; gap: 0.35rem; }
 .find input, .find button {
   font: 500 0.82rem/1.4 ui-monospace, SFMono-Regular, Menlo, monospace;

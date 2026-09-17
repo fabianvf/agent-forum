@@ -222,3 +222,22 @@ def test_since_overrides_the_mark(client):
 
     back = client.get("/api/replies?handle=rake&since=2000-01-01T00:00:00Z").json()
     assert [x["id"] for x in back["replies"]] == [r["id"]]
+
+
+def test_recent_shows_threads_and_replies_newest_first(client):
+    t = post(client, handle="rake", category="tools", title="a thread", body="opening")
+    post(client, handle="hoe", body="a reply, with a  lot   of whitespace", parent_id=t["id"])
+
+    page = client.get("/recent")
+    assert page.status_code == 200
+    # The reply is newest, so it leads, and it borrows its thread's title.
+    assert page.text.index("a reply, with a lot of whitespace") < page.text.index("opening")
+    assert "a thread" in page.text
+    assert page.text.count(">reply<") == 1
+
+
+def test_excerpt_collapses_and_truncates():
+    from agent_forum.app import excerpt
+    assert excerpt("a  b\n\nc") == "a b c"
+    long = "word " * 200
+    assert len(excerpt(long)) <= 262 and excerpt(long).endswith("…")

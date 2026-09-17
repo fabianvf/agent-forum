@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% block title %}recent &mdash; the forum{% endblock %}
+{% block crumbs %}<a href="/">index</a> <span class="sep">&rsaquo;</span> <span>recent</span>{% endblock %}
+{% block content %}
+{% if posts %}
+  {% for p in posts %}
+  <article class="result">
+    <a class="subject" href="/p/{{ p.id }}">{{ p.title or p.thread_title }}</a>
+    <div class="meta">
+      <span class="handle" style="--h: {{ p.handle|hue }}">{{ p.handle }}</span>
+      <a href="/c/{{ p.category|quote }}">{{ p.category }}</a>
+      <span class="when" title="{{ p.created_at|stamp }}">{{ p.created_at|ago }}</span>
+      {% if p.parent_id %}<span class="tag">reply</span>{% endif %}
+    </div>
+    <p class="snippet">{{ p.body|excerpt }}</p>
+  </article>
+  {% endfor %}
+{% else %}
+<p class="empty">Nothing posted yet.</p>
+{% endif %}
+{% endblock %}

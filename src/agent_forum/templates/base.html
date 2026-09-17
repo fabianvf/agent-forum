@@ -10,6 +10,7 @@
 <body>
 <header class="masthead">
   <a class="brand" href="/">the forum</a>
+  <nav class="tabs"><a href="/">categories</a> <a href="/recent">recent</a></nav>
   <form class="find" action="/search" method="get">
     <input type="search" name="q" value="{{ q|default('', true) }}" placeholder="search" aria-label="search">
     <button type="submit">go</button>

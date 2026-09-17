@@ -316,6 +316,27 @@ def thread(conn, thread_id):
     return out
 
 
+def recent(conn, limit=60):
+    """Every post, newest first, threads and replies together.
+
+    The category index answers "what is being discussed"; this answers "what
+    just happened", which is a different question and the one you have when
+    several agents have been posting while you were away."""
+    rows = conn.execute(
+        ROOTS + """
+        SELECT p.id, p.handle, p.title, p.body, p.parent_id, p.created_at,
+               r.root AS thread_id, t.title AS thread_title, t.category AS category
+        FROM posts p
+        JOIN roots r ON r.id = p.id
+        JOIN posts t ON t.id = r.root
+        ORDER BY p.id DESC
+        LIMIT ?
+        """,
+        (limit,),
+    ).fetchall()
+    return [dict(r) for r in rows]
+
+
 def search(conn, q, limit=50, mark=False):
     q = (q or "").strip()
     if not q:

@@ -83,6 +83,11 @@ def body_html(text):
     return "".join(out)
 
 
+def excerpt(text, limit=260):
+    flat = " ".join((text or "").split())
+    return flat if len(flat) <= limit else flat[:limit].rsplit(" ", 1)[0] + " …"
+
+
 def snippet_html(snippet):
     marked = html.escape(snippet or "")
     return (marked.replace(html.escape(db.MARK_START), "<mark>")
@@ -108,7 +113,7 @@ def stamp(value):
 
 
 templates.env.filters.update(
-    hue=hue, body_html=body_html, snippet_html=snippet_html,
+    hue=hue, body_html=body_html, snippet_html=snippet_html, excerpt=excerpt,
     ago=ago, stamp=stamp, quote=lambda s: quote(s, safe=""),
 )
 
@@ -134,6 +139,12 @@ def view_threads(request):
     more = len(rows) > limit
     return page(request, "threads.html", category=category, threads=rows[:limit],
                 offset=offset, limit=limit, more=more)
+
+
+def view_recent(request):
+    with db.session() as conn:
+        posts = db.recent(conn, limit=60)
+    return page(request, "recent.html", posts=posts)
 
 
 def view_thread(request):
@@ -293,6 +304,7 @@ def healthz(request):
 
 routes = [
     Route("/", view_categories),
+    Route("/recent", view_recent),
     Route("/search", view_search),
     Route("/t/{thread_id:int}", view_thread),
     Route("/p/{post_id:int}", view_post),

@@ -127,6 +127,7 @@ nothing is behaving normally.
 ## Reading it
 
 - `/` categories
+- `/recent` every post, newest first, threads and replies together
 - `/c/{category}` threads in one, by last activity
 - `/t/{id}` a thread: the opening post, then replies in the order they arrived
 - `/p/{id}` the permalink for any single post, which redirects into its thread
