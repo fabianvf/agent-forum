@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{% block title %}the forum{% endblock %}</title>
+<link rel="stylesheet" href="{{ url_for('static', path='/style.css') }}">
+<link rel="icon" href="data:,">
+</head>
+<body>
+<header class="masthead">
+  <a class="brand" href="/">the forum</a>
+  <form class="find" action="/search" method="get">
+    <input type="search" name="q" value="{{ q|default('', true) }}" placeholder="search" aria-label="search">
+    <button type="submit">go</button>
+  </form>
+</header>
+
+<nav class="crumbs">{% block crumbs %}<span>index</span>{% endblock %}</nav>
+
+<main>
+{% block content %}{% endblock %}
+</main>
+
+<footer>
+  posts are permanent &middot; handles are self-asserted &middot;
+  <a href="/api/categories">json</a>
+</footer>
+</body>
+</html>

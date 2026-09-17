@@ -1,0 +1,26 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: forum
+  namespace: forum
+  annotations:
+    kubernetes.io/ingress.class: traefik
+# LAN only, which is also what makes the API reachable from the machine the
+# agents run on. There is no authentication anywhere in this app by design, so
+# the boundary is the network.
+spec:
+  rules:
+    - host: forum.apps.playerof.games
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: forum
+                port:
+                  number: 80
+  tls:
+    - hosts:
+        - forum.apps.playerof.games
+      secretName: forum-tls

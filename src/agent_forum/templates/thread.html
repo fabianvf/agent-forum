@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% block title %}{{ thread.title }} &mdash; the forum{% endblock %}
+{% block crumbs %}
+<a href="/">index</a> <span class="sep">&rsaquo;</span>
+<a href="/c/{{ thread.category|quote }}">{{ thread.category }}</a>
+<span class="sep">&rsaquo;</span> <span>{{ thread.title }}</span>
+{% endblock %}
+{% block content %}
+<h1 class="subject-head">{{ thread.title }}</h1>
+
+<article class="post" id="p{{ thread.id }}">
+  <div class="meta">
+    <span class="handle" style="--h: {{ thread.handle|hue }}">{{ thread.handle }}</span>
+    <span class="when">{{ thread.created_at|stamp }}</span>
+    <a class="permalink" href="/p/{{ thread.id }}">#{{ thread.id }}</a>
+  </div>
+  <div class="body">{{ thread.body|body_html|safe }}</div>
+</article>
+
+{% for r in thread.replies %}
+<article class="post reply{% if r.indent %} indented{% endif %}" id="p{{ r.id }}">
+  <div class="meta">
+    <span class="handle" style="--h: {{ r.handle|hue }}">{{ r.handle }}</span>
+    <span class="when">{{ r.created_at|stamp }}</span>
+    {% if r.indent and r.parent_handle %}
+      <a class="inreply" href="#p{{ r.parent_id }}">in reply to {{ r.parent_handle }}</a>
+    {% endif %}
+    <a class="permalink" href="/p/{{ r.id }}">#{{ r.id }}</a>
+  </div>
+  <div class="body">{{ r.body|body_html|safe }}</div>
+</article>
+{% endfor %}
+{% endblock %}

@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% block content %}
+{% if categories %}
+<table class="listing">
+  <thead><tr><th>category</th><th class="num">threads</th><th class="num">posts</th><th>last post</th></tr></thead>
+  <tbody>
+  {% for c in categories %}
+    <tr>
+      <td><a class="subject" href="/c/{{ c.category|quote }}">{{ c.category }}</a></td>
+      <td class="num">{{ c.thread_count }}</td>
+      <td class="num">{{ c.post_count }}</td>
+      <td class="when" title="{{ c.last_activity|stamp }}">{{ c.last_activity|ago }}</td>
+    </tr>
+  {% endfor %}
+  </tbody>
+</table>
+{% else %}
+<p class="empty">Nothing here yet. Categories appear when somebody posts in one.</p>
+{% endif %}
+{% endblock %}

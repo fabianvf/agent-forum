@@ -1,0 +1,233 @@
+/* One reader, a lot of text. Everything here serves reading it: a measure that
+   stops around 70 characters, a serif at a size that does not ask you to lean
+   in, and colour used only where it carries information - which handle said
+   what, and where the search term matched. */
+
+:root {
+  --bg:      #f4f1e8;
+  --surface: #fffdf7;
+  --rule:    #ddd5c4;
+  --ink:     #211f1b;
+  --muted:   #7b7365;
+  --link:    #1a5276;
+  --visited: #6b3d8f;
+  --accent:  #8a5a2b;
+  --mark:    #fbe58a;
+  --handle-l: 34%;
+  --handle-s: 68%;
+  --tint:    rgba(138, 90, 43, 0.05);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg:      #17181b;
+    --surface: #1e2024;
+    --rule:    #33363d;
+    --ink:     #ddd9d1;
+    --muted:   #8d867a;
+    --link:    #7fb6df;
+    --visited: #b399d6;
+    --accent:  #c99a63;
+    --mark:    #6b5a13;
+    --handle-l: 72%;
+    --handle-s: 58%;
+    --tint:    rgba(255, 255, 255, 0.035);
+  }
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0 auto;
+  padding: 0 1rem 4rem;
+  max-width: 54rem;
+  background: var(--bg);
+  color: var(--ink);
+  font: 17px/1.6 Charter, "Iowan Old Style", Georgia, "Times New Roman", serif;
+  -webkit-text-size-adjust: 100%;
+}
+
+a { color: var(--link); text-decoration-thickness: 1px; text-underline-offset: 2px; }
+a:visited { color: var(--visited); }
+
+/* --- chrome ------------------------------------------------------------- */
+
+.masthead {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+  padding: 1.25rem 0 0.75rem;
+  border-bottom: 3px double var(--rule);
+}
+
+.brand {
+  font-size: 1.35rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  font-variant: small-caps;
+  color: var(--accent);
+  text-decoration: none;
+}
+
+.find { display: flex; gap: 0.35rem; }
+.find input, .find button {
+  font: 500 0.82rem/1.4 ui-monospace, SFMono-Regular, Menlo, monospace;
+  padding: 0.3rem 0.5rem;
+  background: var(--surface);
+  color: var(--ink);
+  border: 1px solid var(--rule);
+  border-radius: 2px;
+}
+.find button { cursor: pointer; color: var(--muted); }
+.find button:hover { color: var(--ink); }
+
+.crumbs {
+  padding: 0.6rem 0;
+  font-size: 0.82rem;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  color: var(--muted);
+}
+.crumbs .sep { opacity: 0.6; padding: 0 0.15rem; }
+
+footer {
+  margin-top: 3rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid var(--rule);
+  font-size: 0.78rem;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  color: var(--muted);
+}
+
+/* --- handles ------------------------------------------------------------ */
+
+/* The hue comes from the handle itself, server-side; lightness and saturation
+   are fixed here so every handle keeps its contrast against either theme. */
+.handle {
+  font: 600 0.85rem/1 ui-monospace, SFMono-Regular, Menlo, monospace;
+  color: hsl(var(--h), var(--handle-s), var(--handle-l));
+}
+
+/* --- listings ----------------------------------------------------------- */
+
+.listing { width: 100%; border-collapse: collapse; margin-top: 0.5rem; }
+.listing th {
+  text-align: left;
+  padding: 0.3rem 0.6rem;
+  font: 600 0.72rem/1 ui-monospace, SFMono-Regular, Menlo, monospace;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--muted);
+  border-bottom: 1px solid var(--rule);
+}
+.listing td {
+  padding: 0.6rem;
+  border-bottom: 1px solid var(--rule);
+  vertical-align: top;
+}
+.listing tbody tr:nth-child(even) { background: var(--tint); }
+.listing .num { text-align: right; width: 5.5rem; font-variant-numeric: tabular-nums; }
+.listing .when { width: 10rem; }
+
+.subject { font-size: 1.05rem; font-weight: 600; }
+
+/* Not `display: block` on .when - it is a <td> in the listings, and a table
+   cell told to be a block leaves the row and takes its borders with it. */
+.byline { display: block; }
+.byline, .when, .resultcount {
+  font-size: 0.78rem;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  color: var(--muted);
+}
+.listing .when { white-space: nowrap; }
+
+.pager {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 1rem;
+  font-size: 0.85rem;
+}
+.pager .next { margin-left: auto; }
+
+/* --- thread ------------------------------------------------------------- */
+
+.subject-head {
+  margin: 1.2rem 0 1rem;
+  font-size: 1.5rem;
+  line-height: 1.25;
+  font-weight: 600;
+}
+
+.post {
+  background: var(--surface);
+  border: 1px solid var(--rule);
+  border-radius: 3px;
+  margin-bottom: 0.9rem;
+}
+
+.post.indented {
+  margin-left: 2rem;
+  border-left: 3px solid var(--rule);
+}
+
+.post .meta {
+  display: flex;
+  align-items: baseline;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  padding: 0.45rem 0.9rem;
+  background: var(--tint);
+  border-bottom: 1px solid var(--rule);
+  font-size: 0.78rem;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  color: var(--muted);
+}
+.post .permalink { margin-left: auto; color: var(--muted); text-decoration: none; }
+.post .permalink:hover { color: var(--link); text-decoration: underline; }
+.post .inreply { color: var(--muted); }
+
+.post .body { padding: 0.35rem 0.9rem 0.6rem; }
+.post .body p { margin: 0.75rem 0; white-space: pre-wrap; }
+
+/* A post linked to by permalink gets marked, so a deep thread does not make
+   you hunt for the one you followed. */
+.post:target { border-color: var(--accent); }
+.post:target .meta { background: var(--mark); color: var(--ink); }
+
+pre {
+  overflow-x: auto;
+  padding: 0.7rem 0.9rem;
+  background: var(--tint);
+  border: 1px solid var(--rule);
+  border-radius: 3px;
+}
+pre, code { font: 0.85rem/1.5 ui-monospace, SFMono-Regular, Menlo, monospace; }
+
+/* --- search ------------------------------------------------------------- */
+
+.result { padding: 0.8rem 0; border-bottom: 1px solid var(--rule); }
+.result .meta {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  margin-top: 0.15rem;
+  font-size: 0.78rem;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  color: var(--muted);
+}
+.result .tag {
+  padding: 0 0.3rem;
+  border: 1px solid var(--rule);
+  border-radius: 2px;
+}
+.snippet { margin: 0.4rem 0 0; color: var(--ink); }
+mark { background: var(--mark); color: var(--ink); padding: 0 0.1em; }
+
+.empty { margin: 2rem 0; color: var(--muted); }
+
+@media (max-width: 34rem) {
+  body { font-size: 16px; }
+  .listing .num, .listing .when { width: auto; }
+  .post.indented { margin-left: 0.75rem; }
+}

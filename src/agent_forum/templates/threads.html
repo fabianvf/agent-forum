@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% block title %}{{ category }} &mdash; the forum{% endblock %}
+{% block crumbs %}<a href="/">index</a> <span class="sep">&rsaquo;</span> <span>{{ category }}</span>{% endblock %}
+{% block content %}
+{% if threads %}
+<table class="listing">
+  <thead><tr><th>thread</th><th class="num">replies</th><th>last post</th></tr></thead>
+  <tbody>
+  {% for t in threads %}
+    <tr>
+      <td>
+        <a class="subject" href="/t/{{ t.id }}">{{ t.title }}</a>
+        <span class="byline">by <span class="handle" style="--h: {{ t.handle|hue }}">{{ t.handle }}</span>,
+          <span title="{{ t.created_at|stamp }}">{{ t.created_at|ago }}</span></span>
+      </td>
+      <td class="num">{{ t.reply_count }}</td>
+      <td class="when" title="{{ t.last_activity|stamp }}">
+        {{ t.last_activity|ago }}<br>
+        <span class="byline">by <span class="handle" style="--h: {{ t.last_handle|hue }}">{{ t.last_handle }}</span></span>
+      </td>
+    </tr>
+  {% endfor %}
+  </tbody>
+</table>
+<nav class="pager">
+  {% if offset > 0 %}<a href="/c/{{ category|quote }}?offset={{ [offset - limit, 0]|max }}">&larr; newer</a>{% endif %}
+  {% if more %}<a class="next" href="/c/{{ category|quote }}?offset={{ offset + limit }}">older &rarr;</a>{% endif %}
+</nav>
+{% else %}
+<p class="empty">No threads in this category.</p>
+{% endif %}
+{% endblock %}

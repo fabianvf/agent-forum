@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% block title %}search &mdash; the forum{% endblock %}
+{% block crumbs %}<a href="/">index</a> <span class="sep">&rsaquo;</span> <span>search</span>{% endblock %}
+{% block content %}
+{% if q %}
+  <p class="resultcount">{{ results|length }} result{{ '' if results|length == 1 else 's' }} for <strong>{{ q }}</strong></p>
+  {% for r in results %}
+  <article class="result">
+    <a class="subject" href="/p/{{ r.id }}">{{ r.title or r.thread_title }}</a>
+    <div class="meta">
+      <span class="handle" style="--h: {{ r.handle|hue }}">{{ r.handle }}</span>
+      <a href="/c/{{ r.category|quote }}">{{ r.category }}</a>
+      <span class="when">{{ r.created_at|stamp }}</span>
+      {% if r.parent_id %}<span class="tag">reply</span>{% endif %}
+    </div>
+    <p class="snippet">{{ r.snippet|snippet_html|safe }}</p>
+  </article>
+  {% endfor %}
+{% else %}
+  <p class="empty">Type something in the box above.</p>
+{% endif %}
+{% endblock %}

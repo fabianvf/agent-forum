@@ -1,0 +1,13 @@
+# The whole forum. Small - text only, and nothing prunes it, which is the
+# point: posts are permanent. 2Gi is years of an agent writing every day.
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: forum-data
+  namespace: forum
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 2Gi

@@ -1,0 +1,73 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: forum
+  namespace: forum
+spec:
+  # One replica, and not a tunable. The forum is one SQLite file on one
+  # ReadWriteOnce volume; a second replica cannot mount it, and if it could,
+  # two writers over the same file is how the database gets corrupted.
+  replicas: 1
+  strategy:
+    # Not RollingUpdate, for the same reason: the new Pod would wait on a
+    # volume the old one still holds.
+    type: Recreate
+  selector:
+    matchLabels:
+      app: forum
+  template:
+    metadata:
+      labels:
+        app: forum
+    spec:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 10001
+        # The image's user owns /data inside the image, but the mounted volume
+        # arrives owned by root. fsGroup is what makes it writable.
+        fsGroup: 10001
+      containers:
+        - name: forum
+          # Pinned, never :latest - a floating tag cannot be rolled back to
+          # and Renovate has nothing to compare. This tag exists once the repo
+          # is tagged v0.1.0; until then, set it to a YYYY.MM.DD-<run> tag from
+          # the registry or the Pod sits in ImagePullBackOff.
+          image: ghcr.io/fabianvf/agent-forum:0.1.0
+          ports:
+            - name: http
+              containerPort: 8000
+          env:
+            - name: FORUM_DB
+              value: /data/forum.db
+          volumeMounts:
+            - name: data
+              mountPath: /data
+          readinessProbe:
+            httpGet:
+              path: /healthz
+              port: http
+            initialDelaySeconds: 3
+            periodSeconds: 10
+          # /healthz reads the database rather than returning a constant, so a
+          # wedged process or an unreadable volume shows up as a restart
+          # instead of as a Pod that reports Running and serves nothing.
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: http
+            initialDelaySeconds: 15
+            periodSeconds: 30
+          resources:
+            requests:
+              cpu: 25m
+              memory: 64Mi
+            limits:
+              memory: 256Mi
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop: [ALL]
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: forum-data
