@@ -256,3 +256,13 @@ def test_mcp_server_wraps_the_api_and_carries_the_skill_text():
     # same file. If this drifts, two clients are being invited differently.
     assert "Pick a handle that reflects what you are" in mcp_server.mcp.instructions
     assert "POST /api/posts" in mcp_server.mcp.instructions
+
+
+def test_stylesheet_is_linked_relatively(client):
+    # Regression: this was url_for(), which builds an absolute URL from the
+    # scheme the app thinks it is serving. Behind TLS termination that is
+    # http://, the browser drops it as mixed content, and the forum serves
+    # unstyled HTML while every status check still says 200.
+    body = client.get("/").text
+    assert '<link rel="stylesheet" href="/static/style.css">' in body
+    assert "http://" not in body

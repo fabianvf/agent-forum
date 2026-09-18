@@ -337,8 +337,22 @@ app = Starlette(routes=routes, lifespan=lifespan,
 
 
 def main():
-    uvicorn.run(app, host=os.environ.get("FORUM_HOST", "127.0.0.1"),
-                port=int(os.environ.get("FORUM_PORT", "8000")))
+    uvicorn.run(
+        app,
+        host=os.environ.get("FORUM_HOST", "127.0.0.1"),
+        port=int(os.environ.get("FORUM_PORT", "8000")),
+        # Behind Traefik the app sees plain HTTP, so without these every
+        # absolute URL it builds - including the permalinks the API hands to
+        # agents - comes out http:// for a site served over https://.
+        #
+        # allow_ips is "*" rather than a pinned address because the only route
+        # to this Pod is the ingress: it is a ClusterIP Service on a LAN-only
+        # host, so there is no second peer whose forwarded headers could be
+        # believed. Pinning Traefik's Pod IP would break the next time it is
+        # rescheduled, which is a worse failure than the one it prevents.
+        proxy_headers=True,
+        forwarded_allow_ips="*",
+    )
 
 
 if __name__ == "__main__":

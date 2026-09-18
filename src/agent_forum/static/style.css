@@ -16,6 +16,7 @@
   --handle-l: 34%;
   --handle-s: 68%;
   --tint:    rgba(138, 90, 43, 0.05);
+  --header:  rgba(138, 90, 43, 0.10);
 }
 
 @media (prefers-color-scheme: dark) {
@@ -32,6 +33,7 @@
     --handle-l: 72%;
     --handle-s: 58%;
     --tint:    rgba(255, 255, 255, 0.035);
+  --header:  rgba(255, 255, 255, 0.075);
   }
 }
 
@@ -40,7 +42,7 @@
 body {
   margin: 0 auto;
   padding: 0 1rem 4rem;
-  max-width: 54rem;
+  max-width: 46rem;
   background: var(--bg);
   color: var(--ink);
   font: 17px/1.6 Charter, "Iowan Old Style", Georgia, "Times New Roman", serif;
@@ -113,7 +115,7 @@ footer {
 /* The hue comes from the handle itself, server-side; lightness and saturation
    are fixed here so every handle keeps its contrast against either theme. */
 .handle {
-  font: 600 0.85rem/1 ui-monospace, SFMono-Regular, Menlo, monospace;
+  font: 700 0.9rem/1 ui-monospace, SFMono-Regular, Menlo, monospace;
   color: hsl(var(--h), var(--handle-s), var(--handle-l));
 }
 
@@ -171,21 +173,26 @@ footer {
   background: var(--surface);
   border: 1px solid var(--rule);
   border-radius: 3px;
-  margin-bottom: 0.9rem;
+  /* These are essays, not one-liners. At 0.9rem the gap between the end of a
+     600-word post and the next poster's name read as a paragraph break. */
+  margin-bottom: 2rem;
+  /* The poster's own colour down the edge of the card. The handle already
+     carries it, but the handle is one word at the top and the thing you need
+     at a glance, six screens in, is whether the voice has changed. */
+  border-left: 3px solid hsl(var(--h), var(--handle-s), var(--handle-l));
 }
 
-.post.indented {
-  margin-left: 2rem;
-  border-left: 3px solid var(--rule);
-}
+/* One level, however deep the chain goes. Indent alone now - the left border
+   belongs to whoever is speaking. */
+.post.indented { margin-left: 2rem; }
 
 .post .meta {
   display: flex;
   align-items: baseline;
   gap: 0.75rem;
   flex-wrap: wrap;
-  padding: 0.45rem 0.9rem;
-  background: var(--tint);
+  padding: 0.55rem 0.9rem;
+  background: var(--header);
   border-bottom: 1px solid var(--rule);
   font-size: 0.78rem;
   font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
@@ -214,7 +221,7 @@ pre, code { font: 0.85rem/1.5 ui-monospace, SFMono-Regular, Menlo, monospace; }
 
 /* --- search ------------------------------------------------------------- */
 
-.result { padding: 0.8rem 0; border-bottom: 1px solid var(--rule); }
+.result { padding: 1.1rem 0; border-bottom: 1px solid var(--rule); }
 .result .meta {
   display: flex;
   gap: 0.75rem;

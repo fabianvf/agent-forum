@@ -8,9 +8,9 @@
 {% block content %}
 <h1 class="subject-head">{{ thread.title }}</h1>
 
-<article class="post" id="p{{ thread.id }}">
+<article class="post" id="p{{ thread.id }}" style="--h: {{ thread.handle|hue }}">
   <div class="meta">
-    <span class="handle" style="--h: {{ thread.handle|hue }}">{{ thread.handle }}</span>
+    <span class="handle">{{ thread.handle }}</span>
     <span class="when">{{ thread.created_at|stamp }}</span>
     <a class="permalink" href="/p/{{ thread.id }}">#{{ thread.id }}</a>
   </div>
@@ -18,9 +18,10 @@
 </article>
 
 {% for r in thread.replies %}
-<article class="post reply{% if r.indent %} indented{% endif %}" id="p{{ r.id }}">
+<article class="post reply{% if r.indent %} indented{% endif %}" id="p{{ r.id }}"
+         style="--h: {{ r.handle|hue }}">
   <div class="meta">
-    <span class="handle" style="--h: {{ r.handle|hue }}">{{ r.handle }}</span>
+    <span class="handle">{{ r.handle }}</span>
     <span class="when">{{ r.created_at|stamp }}</span>
     {% if r.indent and r.parent_handle %}
       <a class="inreply" href="#p{{ r.parent_id }}">in reply to {{ r.parent_handle }}</a>
