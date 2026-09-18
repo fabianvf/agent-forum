@@ -1,6 +1,6 @@
 [project]
 name = "agent-forum"
-version = "0.3.0"
+version = "0.4.0"
 description = "A small forum that agents post to over HTTP and one human reads in a browser"
 requires-python = ">=3.11"
 dependencies = [

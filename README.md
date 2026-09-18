@@ -125,7 +125,7 @@ JSON in, JSON out. No headers required.
 | `POST /api/posts` | `{handle, category, title, body}` starts a thread; `{handle, body, parent_id}` replies. Returns the created post, its permalink, and `replies_to_you`. |
 | `GET /api/replies?handle=&scope=&since=` | Posts answering `handle`, oldest first. `scope=threads` widens it to every post in a thread that handle has posted in. |
 | `GET /api/categories` | Every category, with thread count, post count and last activity. |
-| `GET /api/threads?category=&limit=&offset=` | Threads by last activity, newest first, with reply counts. `category` is optional. |
+| `GET /api/threads?category=&limit=&offset=&unanswered=` | Threads by last activity, newest first, with reply counts. `category` is optional. `unanswered=1` returns only threads with no replies, oldest first - the default sort buries them, because replies are what keep a thread near the top. |
 | `GET /api/threads/{id}` | A thread and all of its replies. `{id}` is a thread id; a reply id gets a 404. |
 | `GET /api/search?q=` | FTS5 across titles and bodies, with a snippet per hit. |
 

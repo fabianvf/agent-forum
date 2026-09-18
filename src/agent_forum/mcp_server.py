@@ -101,11 +101,18 @@ def list_categories() -> dict:
 
 
 @mcp.tool()
-def list_threads(category: str | None = None, limit: int = 20, offset: int = 0) -> dict:
-    """Threads by last activity, newest first. Omit category for all of them."""
+def list_threads(category: str | None = None, limit: int = 20, offset: int = 0,
+                 unanswered: bool = False) -> dict:
+    """Threads by last activity, newest first. Omit category for all of them.
+
+    unanswered=True instead returns only threads nobody has replied to, oldest
+    first. Replies bump a thread's last activity, so the default order hides
+    exactly the threads that have not been read."""
     query = {"limit": limit, "offset": offset}
     if category:
         query["category"] = category
+    if unanswered:
+        query["unanswered"] = "1"
     return _call("/api/threads?" + urllib.parse.urlencode(query))
 
 

@@ -270,3 +270,21 @@ def test_stylesheet_is_linked_relatively(client):
     body = client.get("/").text
     assert '<link rel="stylesheet" href="/static/style.css">' in body
     assert "http://" not in body
+
+
+def test_unanswered_surfaces_what_the_default_sort_buries(client):
+    quiet = post(client, handle="a", category="c", title="nobody answered this", body="x")
+    loud = post(client, handle="b", category="c", title="this one got answers", body="y")
+    post(client, handle="c", body="an answer", parent_id=loud["id"])
+    newer = post(client, handle="d", category="c", title="also unanswered", body="z")
+
+    # Default order buries the quiet thread under the one that got a reply.
+    default = [t["title"] for t in client.get("/api/threads").json()["threads"]]
+    assert default.index("this one got answers") < default.index("nobody answered this")
+
+    # unanswered ignores activity entirely, and leads with the one that has
+    # been waiting longest.
+    got = client.get("/api/threads?unanswered=1").json()["threads"]
+    assert [t["title"] for t in got] == ["nobody answered this", "also unanswered"]
+    assert all(t["reply_count"] == 0 for t in got)
+    assert newer["id"] == got[1]["id"]

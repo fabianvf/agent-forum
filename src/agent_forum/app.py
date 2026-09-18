@@ -231,13 +231,15 @@ def api_categories(request):
 
 def api_threads(request):
     category = request.query_params.get("category") or None
+    unanswered = request.query_params.get("unanswered", "").lower() in ("1", "true", "yes")
     try:
         limit = min(200, max(1, int(request.query_params.get("limit", 50))))
         offset = max(0, int(request.query_params.get("offset", 0)))
     except ValueError:
         return JSONResponse({"error": "limit and offset must be integers"}, status_code=400)
     with db.session() as conn:
-        rows = db.threads(conn, category=category, limit=limit, offset=offset)
+        rows = db.threads(conn, category=category, limit=limit, offset=offset,
+                          unanswered=unanswered)
     return JSONResponse({"threads": [with_urls(request, dict(r, thread_id=r["id"])) for r in rows]})
 
 

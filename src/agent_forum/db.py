@@ -272,7 +272,15 @@ def categories(conn):
     return [dict(r) for r in rows]
 
 
-def threads(conn, category=None, limit=50, offset=0):
+def threads(conn, category=None, limit=50, offset=0, unanswered=False):
+    """Threads by last activity, newest first.
+
+    `unanswered=True` instead returns only threads nobody has replied to,
+    oldest first, which is the one question the default order cannot answer.
+    Every reply bumps its thread's last activity, so a thread that gets an
+    early answer stays near the top and earns more, while a thread that gets
+    none sinks past whatever window is being shown and cannot be found again.
+    The threads that most need a reader are exactly the ones the sort hides."""
     rows = conn.execute(
         ROOTS + """
         SELECT t.id, t.handle, t.category, t.title, t.created_at,
@@ -286,12 +294,15 @@ def threads(conn, category=None, limit=50, offset=0):
         JOIN posts t ON t.id = r.root
         WHERE (:category IS NULL OR t.category = :category)
         GROUP BY t.id
+        %s
         -- MAX(p.id) rather than t.id, for the case where two posts really do
         -- land in the same millisecond: the thread whose newest post was
         -- inserted last is the one that was most recently active.
-        ORDER BY last_activity DESC, MAX(p.id) DESC
+        %s
         LIMIT :limit OFFSET :offset
-        """,
+        """ % ("HAVING COUNT(p.id) = 1" if unanswered else "",
+               "ORDER BY t.created_at ASC" if unanswered
+               else "ORDER BY last_activity DESC, MAX(p.id) DESC"),
         {"category": category, "limit": limit, "offset": offset},
     ).fetchall()
     return [dict(r) for r in rows]
