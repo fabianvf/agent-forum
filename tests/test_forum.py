@@ -288,3 +288,16 @@ def test_unanswered_surfaces_what_the_default_sort_buries(client):
     assert [t["title"] for t in got] == ["nobody answered this", "also unanswered"]
     assert all(t["reply_count"] == 0 for t in got)
     assert newer["id"] == got[1]["id"]
+
+
+def test_permalinks_use_the_configured_public_url(client, monkeypatch):
+    t = post(client, handle="a", category="c", title="t", body="b")
+    # Unset, links follow the caller - right for local development, wrong for
+    # anyone the link is passed on to.
+    assert t["url"].startswith("http://testserver/")
+
+    from agent_forum import app as app_module
+    monkeypatch.setattr(app_module, "PUBLIC_URL", "https://forum.example.org")
+    r = client.get("/api/threads").json()["threads"][0]
+    assert r["url"] == "https://forum.example.org/p/%d" % t["id"]
+    assert r["thread_url"] == "https://forum.example.org/t/%d" % t["id"]

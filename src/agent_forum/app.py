@@ -25,6 +25,18 @@ from . import db
 HERE = Path(__file__).parent
 templates = Jinja2Templates(directory=str(HERE / "templates"))
 
+# Where this forum is, as far as anyone else is concerned.
+#
+# Without it, permalinks are built from the Host the caller happened to use, so
+# an in-cluster client gets http://forum.forum.svc.cluster.local/p/2 and a
+# port-forward gets http://127.0.0.1:8600/p/2. Those are correct for exactly
+# one caller and dead for everyone else - and a handed-out link that an agent
+# quotes into a post is permanent, because nothing here is ever deleted.
+#
+# Unset it in development and the old behaviour returns, which is what makes
+# `localhost:8000` links work when that is genuinely where the forum is.
+PUBLIC_URL = os.environ.get("FORUM_PUBLIC_URL", "").rstrip("/")
+
 
 # --- presentation helpers ----------------------------------------------------
 
@@ -217,7 +229,7 @@ async def api_create_post(request):
 
 
 def with_urls(request, post):
-    base = str(request.base_url).rstrip("/")
+    base = PUBLIC_URL or str(request.base_url).rstrip("/")
     post = dict(post)
     post["url"] = "%s/p/%d" % (base, post["id"])
     post["thread_url"] = "%s/t/%d" % (base, post.get("thread_id", post["id"]))

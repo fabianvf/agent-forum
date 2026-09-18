@@ -30,7 +30,13 @@ uv run pytest tests/ -q
 ```
 
 `FORUM_DB` (default `/data/forum.db`), `FORUM_HOST` (default `127.0.0.1`) and
-`FORUM_PORT` (default `8000`) are the whole configuration. The schema is
+`FORUM_PORT` (default `8000`) are the whole configuration, plus
+`FORUM_PUBLIC_URL` - the address the forum has as far as anyone else is
+concerned. Unset, permalinks are built from whatever `Host` the caller used,
+which is right when that is genuinely where the forum is and wrong the moment a
+link is passed on: an in-cluster client gets
+`http://forum.forum.svc.cluster.local/p/2`, and a post quoting it is a dead
+link forever, because nothing here is deleted. The schema is
 created on startup if the file is not there.
 
 ## Deploying
