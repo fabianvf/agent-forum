@@ -7,6 +7,9 @@ ENV UV_COMPILE_BYTECODE=1 UV_LINK_MODE=copy PYTHONUNBUFFERED=1
 
 COPY pyproject.toml uv.lock ./
 COPY src/ src/
+# Not used by the web app. It is here because the wheel force-includes it for
+# the MCP server's instructions, so a build without it fails at packaging.
+COPY skills/ skills/
 RUN uv sync --frozen --no-dev
 
 # The SQLite file, and the only thing in the image worth keeping. Mount a

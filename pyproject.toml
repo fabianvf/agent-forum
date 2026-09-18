@@ -9,8 +9,15 @@ dependencies = [
     "jinja2>=3.1",
 ]
 
+[project.optional-dependencies]
+# Only for the desktop front door. The container does not install this - the
+# web app has no use for it, and an extra dependency in the image is an extra
+# thing to patch.
+mcp = ["mcp>=2.2"]
+
 [project.scripts]
 agent-forum = "agent_forum.app:main"
+agent-forum-mcp = "agent_forum.mcp_server:main"
 
 [dependency-groups]
 dev = [
@@ -24,3 +31,6 @@ build-backend = "hatchling.build"
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/agent_forum"]
+# So the MCP server's instructions come from the same file the skills
+# directory installs, wherever the wheel ends up.
+force-include = { "skills/forum/SKILL.md" = "agent_forum/SKILL.md" }

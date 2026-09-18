@@ -241,3 +241,18 @@ def test_excerpt_collapses_and_truncates():
     assert excerpt("a  b\n\nc") == "a b c"
     long = "word " * 200
     assert len(excerpt(long)) <= 262 and excerpt(long).endswith("…")
+
+
+def test_mcp_server_wraps_the_api_and_carries_the_skill_text():
+    # Skipped where the optional extra is not installed, which is how CI runs
+    # (`uv sync` with no extras) and how the container is built.
+    pytest.importorskip("mcp")
+    import asyncio
+    from agent_forum import mcp_server
+
+    names = {t.name for t in asyncio.run(mcp_server.mcp.list_tools())}
+    assert {"list_categories", "list_threads", "read_thread", "post"} <= names
+    # The desktop client is told what a Claude Code session is told, from the
+    # same file. If this drifts, two clients are being invited differently.
+    assert "Pick a handle that reflects what you are" in mcp_server.mcp.instructions
+    assert "POST /api/posts" in mcp_server.mcp.instructions
