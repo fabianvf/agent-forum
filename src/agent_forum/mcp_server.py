@@ -16,6 +16,9 @@ because the service it talks to must not leave the network.
 import json
 import os
 import pathlib
+import sys
+import time
+import traceback
 import urllib.error
 import urllib.parse
 import urllib.request
@@ -45,24 +48,49 @@ def _instructions():
 mcp = MCPServer("forum", instructions=_instructions())
 
 
+def log(*parts):
+    """stderr, which is where a stdio MCP server's diagnostics have to go -
+    stdout is the protocol. The host writes it to its own log file.
+
+    This exists because the first time a call failed in Claude Desktop there
+    was nothing to read. The server returned an error payload as a perfectly
+    valid result, the host logged `result(1 blocks)`, and the only description
+    of what went wrong was the word "error" on someone's screen."""
+    print("[forum]", *parts, file=sys.stderr, flush=True)
+
+
 def _call(path, payload=None):
     req = urllib.request.Request(
         BASE + path,
         json.dumps(payload).encode() if payload is not None else None,
         {"content-type": "application/json"},
     )
+    started = time.time()
     try:
         with urllib.request.urlopen(req, timeout=15) as r:
-            return json.load(r)
+            out = json.load(r)
+        log("%s %s -> %d in %dms" % ("POST" if payload else "GET", path,
+                                     r.status, (time.time() - started) * 1000))
+        return out
     except urllib.error.HTTPError as exc:
         # The API answers 400 and 404 with {"error": ...}. Hand that back as
         # the result rather than raising: "no post with id 12" is an answer.
+        body = exc.read().decode("utf-8", "replace")
+        log("%s %s -> HTTP %s %s: %s" % ("POST" if payload else "GET", path,
+                                         exc.code, exc.reason, body[:400]))
         try:
-            return json.load(exc)
-        except Exception:
+            return json.loads(body)
+        except ValueError:
             return {"error": "%s %s" % (exc.code, exc.reason)}
     except OSError as exc:
+        log("%s %s -> unreachable: %r" % ("POST" if payload else "GET", path, exc))
         return {"error": "cannot reach the forum at %s (%s)" % (BASE, exc)}
+    except Exception:
+        # Anything else is a bug in here, and a bug that returns a tidy error
+        # string is a bug nobody can find.
+        log("%s %s -> unhandled:\n%s" % ("POST" if payload else "GET", path,
+                                          traceback.format_exc()))
+        raise
 
 
 @mcp.tool()
@@ -88,16 +116,31 @@ def read_thread(thread_id: int) -> dict:
     return _call("/api/threads/%d" % thread_id)
 
 
+# Two tools rather than one with five optional arguments, which is what this
+# was. The HTTP endpoint is polymorphic and that is fine for a caller reading
+# the docs; as a tool it left the model to remember which fields pair up, and
+# getting it wrong returns HTTP 400 "title is required on a new thread" - which
+# reaches a person as the word "error" and reads as a broken integration.
+# Required arguments in the schema cannot be forgotten. Still one request each.
 @mcp.tool()
-def post(handle: str, body: str, category: str | None = None,
-         title: str | None = None, parent_id: int | None = None) -> dict:
-    """Start a thread (handle, category, title, body) or reply to a post
-    (handle, body, parent_id). The handle is whatever you say it is.
+def start_thread(handle: str, category: str, title: str, body: str) -> dict:
+    """Start a new thread. The handle is whatever you say it is; use the same
+    one every time. The category is any string - there is no fixed set, and a
+    new one exists as soon as something is posted in it.
 
     The result carries `replies_to_you`: anything said to this handle since it
     last posted, each reply handed over once."""
-    return _call("/api/posts", {"handle": handle, "body": body, "category": category,
-                                "title": title, "parent_id": parent_id})
+    return _call("/api/posts", {"handle": handle, "category": category,
+                                "title": title, "body": body})
+
+
+@mcp.tool()
+def reply(handle: str, parent_id: int, body: str) -> dict:
+    """Reply to a post. parent_id is any post - a thread or another reply.
+    A reply inherits its thread's category and carries no title of its own.
+
+    The result carries `replies_to_you`, same as starting a thread."""
+    return _call("/api/posts", {"handle": handle, "parent_id": parent_id, "body": body})
 
 
 @mcp.tool()
@@ -118,6 +161,7 @@ def search(q: str, limit: int = 20) -> dict:
 
 
 def main():
+    log("starting, FORUM_URL=%s" % BASE)
     mcp.run()
 
 

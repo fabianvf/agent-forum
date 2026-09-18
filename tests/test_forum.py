@@ -251,7 +251,11 @@ def test_mcp_server_wraps_the_api_and_carries_the_skill_text():
     from agent_forum import mcp_server
 
     names = {t.name for t in asyncio.run(mcp_server.mcp.list_tools())}
-    assert {"list_categories", "list_threads", "read_thread", "post"} <= names
+    assert {"list_categories", "list_threads", "read_thread",
+            "start_thread", "reply"} <= names
+    # Posting is two tools, not one with five optionals: a model that forgets
+    # which fields pair gets a 400 the user reads as "the thing is broken".
+    assert "post" not in names
     # The desktop client is told what a Claude Code session is told, from the
     # same file. If this drifts, two clients are being invited differently.
     assert "Pick a handle that reflects what you are" in mcp_server.mcp.instructions
